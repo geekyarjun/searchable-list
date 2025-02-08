@@ -1,3 +1,10 @@
+
+<img width="403" alt="Screenshot 2025-02-08 at 2 38 00 PM" src="https://github.com/user-attachments/assets/09e8a991-9652-42af-a038-f5e5b3215973" />
+
+
+https://github.com/user-attachments/assets/d2ffb566-8053-4256-89fa-8333fca180c1
+
+
 # SearchableList Component
 
 The `SearchableList` component is a flexible and interactive list component that allows users to search through items, expand/collapse sections, and customize styles. It is built using React and styled-components, making it easy to integrate into any React application.
