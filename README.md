@@ -17,13 +17,6 @@ The `SearchableList` component is a flexible and interactive list component that
 - **Responsive Design**: The component is designed to be responsive and works well on various screen sizes.
 - **Virtualization with `react-window`**: The component utilizes `react-window` for efficient rendering of large lists, ensuring that only the visible items are rendered in the DOM. This significantly improves performance and scalability, making it suitable for applications with extensive datasets.
 
-## Installation
-
-To use the `SearchableList` component, ensure you have the necessary dependencies installed:
-
-```bash
-npm install searchable-list
-```
 
 ## Usage
 
