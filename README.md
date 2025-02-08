@@ -8,6 +8,7 @@ The `SearchableList` component is a flexible and interactive list component that
 - **Collapsible Sections**: Sections can be expanded or collapsed to show or hide items.
 - **Customizable Styles**: Easily customize the appearance of the list, including text styles and container styles.
 - **Responsive Design**: The component is designed to be responsive and works well on various screen sizes.
+- **Virtualization with `react-window`**: The component utilizes `react-window` for efficient rendering of large lists, ensuring that only the visible items are rendered in the DOM. This significantly improves performance and scalability, making it suitable for applications with extensive datasets.
 
 ## Installation
 
@@ -46,7 +47,6 @@ const App = () => {
 export default App;
 ```
 
-
 ## Props
 
 | Prop                     | Type                          | Description                                                                                     |
@@ -83,8 +83,28 @@ You can customize the appearance of the `SearchableList` component by passing in
 />
 ```
 
+## Running Tests
+
+To run the test cases for the `SearchableList` component, use the following command:
+
+```bash
+npm test
+```
+
+This will execute all the test cases defined in the `SearchableList.test.tsx` file.
+
+## Running Storybook
+
+To run Storybook and view the `SearchableList` component in isolation, use the following command:
+
+```bash
+npm run storybook
+```
+
+This will start the Storybook server, and you can view your `SearchableList` component along with the various stories you created.
+
 ## Conclusion
 
-The `SearchableList` component is a powerful tool for displaying and searching through lists of items in a user-friendly manner. With its customizable styles and interactive features, it can be easily integrated into any React application.
+The `SearchableList` component is a powerful tool for displaying and searching through lists of items in a user-friendly manner. With its customizable styles and interactive features, it can be easily integrated into any React application. The use of `react-window` for virtualization ensures that the component remains performant and scalable, even with large datasets.
 
 For further questions or contributions, feel free to reach out or submit a pull request!
