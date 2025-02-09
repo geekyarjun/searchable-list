@@ -1,7 +1,17 @@
-import React from "react";
-import styled, { css } from "styled-components";
-import { defaultTheme } from "./SearchableList/SearchableList";
-import { StyledProps } from "styled-components";
+import React from 'react';
+import styled, { CSSObject } from 'styled-components';
+
+import { defaultTheme } from './SearchableList/SearchableList.styles';
+
+type ConvertToKebab<T extends string> = T extends `${infer First}${infer Rest}`
+  ? `${First extends Capitalize<First> ? '-' : ''}${Lowercase<First>}${ConvertToKebab<Rest>}`
+  : '';
+
+type KebabCaseCSS = {
+  [K in keyof CSSObject as ConvertToKebab<string & K>]: string | number;
+};
+
+interface StyledProps extends KebabCaseCSS {}
 
 interface TextDisplayProps {
   primaryText: string;
@@ -12,22 +22,7 @@ interface TextDisplayProps {
   secondaryTextClassName?: string;
 }
 
-// const PrimaryText = styled.div<{ customStyle?: React.CSSProperties }>`
-//   ${({ customStyle }) => css`
-//     ${customStyle}
-//   `}
-// `;
-
-// const SecondaryText = styled.div<{ customStyle?: React.CSSProperties }>`
-//   font-size: 13px;
-//   color: ${({ theme }) =>
-//     theme?.colors?.text?.light || defaultTheme.colors.text.light};
-//   ${({ customStyle }) => css`
-//     ${customStyle}
-//   `}
-// `;
-
-const PrimaryText = styled.div<StyledProps>`
+const PrimaryText = styled.div<Partial<StyledProps>>`
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
@@ -36,11 +31,11 @@ const PrimaryText = styled.div<StyledProps>`
 
   ${(props) =>
     Object.entries(props)
-      .filter(([key]) => !["children", "as", "theme"].includes(key))
+      .filter(([key]) => !['children', 'as', 'theme'].includes(key))
       .map(([key, value]) => `${key}: ${value};`)}
 `;
 
-const SecondaryText = styled.div<StyledProps>`
+const SecondaryText = styled.div<Partial<StyledProps>>`
   font-size: 13px;
   font-weight: 400;
   line-height: 16px;
@@ -49,7 +44,7 @@ const SecondaryText = styled.div<StyledProps>`
 
   ${(props) =>
     Object.entries(props)
-      .filter(([key]) => !["children", "as", "theme"].includes(key))
+      .filter(([key]) => !['children', 'as', 'theme'].includes(key))
       .map(([key, value]) => `${key}: ${value};`)}
 `;
 
@@ -63,11 +58,7 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
 }) => {
   return (
     <div>
-      <PrimaryText
-        {...primaryTextStyle}
-        className={primaryTextClassName}
-        // customStyle={primaryTextStyle}
-      >
+      <PrimaryText {...primaryTextStyle} className={primaryTextClassName}>
         {primaryText}
       </PrimaryText>
       {secondaryText && (

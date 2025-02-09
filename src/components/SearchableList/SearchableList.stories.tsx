@@ -1,77 +1,92 @@
-import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
-import SearchableList from "./SearchableList";
-import { sampleData } from "../../../sampleData"; // Adjust the import path as necessary
+import type { Meta, StoryObj } from '@storybook/react';
 
-export default {
-  title: "Components/SearchableList",
+import SearchableList from './SearchableList';
+import { sampleData } from './sampleData'; // Adjust the import path as necessary
+
+const meta: Meta<typeof SearchableList> = {
+  title: 'Components/SearchableList',
   component: SearchableList,
-} as ComponentMeta<typeof SearchableList>;
-
-const Template: ComponentStory<typeof SearchableList> = (args) => (
-  <div style={{ width: "400px" }}>
-    <SearchableList {...args} />
-  </div>
-);
-
-export const Default = Template.bind({});
-Default.args = {
-  data: sampleData,
-  onSearch: (value) => console.log(value),
-  listHeight: 400,
-  primaryTextStyle: { fontWeight: "bold" },
-  secondaryTextStyle: { color: "gray" },
-  containerStyles: { "max-width": "100%" },
-  //   searchInputStyles: { padding: "14px 16px" },
+  args: {
+    styles: {
+      containerStyles: {},
+      searchInputStyles: {},
+      sectionHeaderStyles: {},
+      listItemStyles: {},
+    },
+  },
+  decorators: [
+    /* ... */
+  ],
+  parameters: {
+    /* ... */
+  },
 };
 
-export const WithSearch = Template.bind({});
-WithSearch.args = {
-  data: sampleData,
-  onSearch: (value) => console.log(value),
-  listHeight: 400,
-  primaryTextStyle: { fontWeight: "bold" },
-  secondaryTextStyle: { color: "gray" },
-  containerStyles: { maxWidth: "600px" },
-  searchInputStyles: { padding: "14px 16px" },
+type Story = StoryObj<typeof SearchableList>;
+
+export const Basic: Story = {
+  args: {
+    data: sampleData,
+  },
 };
 
-// Add a story to demonstrate the search functionality
-export const SearchFunctionality = () => {
-  const [searchValue, setSearchValue] = React.useState("");
-
-  return (
-    <div style={{ maxWidth: "600px" }}>
-      <input
-        type="text"
-        placeholder="Search..."
-        value={searchValue}
-        onChange={(e) => setSearchValue(e.target.value)}
-        style={{ padding: "14px 16px", width: "100%", marginBottom: "16px" }}
-      />
-      <SearchableList
-        data={sampleData}
-        onSearch={setSearchValue}
-        listHeight={400}
-        primaryTextStyle={{ fontWeight: "bold" }}
-        secondaryTextStyle={{ color: "gray" }}
-        containerStyles={{ maxWidth: "600px" }}
-      />
-    </div>
-  );
+export const WithProps: Story = {
+  argTypes: {
+    onSearch: {
+      description: 'Search callback',
+    },
+  },
+  args: {
+    data: sampleData,
+    onSearch: (search: string) => {
+      console.log(search);
+    },
+    styles: {
+      containerStyles: {
+        'max-width': '600px',
+        background: '#f0f0f0', // Custom background color
+        border: '1px solid #ccc', // Custom border
+      },
+      searchInputStyles: {
+        border: '2px solid #007AFF', // Custom border for search input
+        'border-radius': '4px', // Custom border radius
+      },
+      sectionHeaderStyles: {
+        background: '#e0e0e0', // Custom background for section headers
+        color: '#333', // Custom text color for section headers
+      },
+      listItemStyles: {
+        padding: '12px', // Custom padding for list items
+        margin: '4px 0', // Custom margin for list items
+      },
+    },
+  },
 };
 
-export const CollapsibleSections = () => {
-  return (
-    <div style={{ maxWidth: "600px" }}>
-      <SearchableList
-        data={sampleData}
-        onSearch={() => {}}
-        listHeight={400}
-        primaryTextStyle={{ fontWeight: "bold" }}
-        secondaryTextStyle={{ color: "gray" }}
-        containerStyles={{ maxWidth: "600px" }}
-      />
-    </div>
-  );
+export const CustomRenderFunctions: Story = {
+  argTypes: {
+    onSearch: {
+      description: 'Search callback',
+    },
+    renderItem: {
+      description: 'Custom item render function',
+    },
+    renderSectionHeader: {
+      description: 'Custom section header render function',
+    },
+  },
+  args: {
+    data: sampleData,
+    onSearch: (search: string) => {
+      console.log(search);
+    },
+    renderItem: (item: any) => {
+      return <div>{item.primaryText}</div>;
+    },
+    renderSectionHeader: (section: any) => {
+      return <div>{section.title}</div>;
+    },
+  },
 };
+
+export default meta;

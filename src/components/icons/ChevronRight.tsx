@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react';
 
 export const ChevronRight: React.FC<React.SVGProps<SVGSVGElement>> = (
-  props
+  props,
 ) => (
   <svg
     width="20"

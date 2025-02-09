@@ -15,6 +15,12 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    // Alias
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
@@ -22,5 +28,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "sampleData.js"]
+  "include": ["src", "src/components/SearchableList/sampleData.ts"]
 }

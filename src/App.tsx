@@ -1,40 +1,65 @@
-import "./App.css";
-import SearchableList from "./components/SearchableList/SearchableList";
-import { sampleData } from "../sampleData";
-import { renderCustomSectionHeader, renderCustomItem } from "./CustomRenderers";
-import React from "react";
-import { ThemeProvider } from "styled-components";
-import { useTheme } from "./hooks/useTheme";
-import { Theme } from "./theme/theme";
+import './App.css';
+import SearchableList from '@/components/SearchableList/SearchableList';
+import { sampleData } from '@/components/SearchableList/sampleData';
+import React from 'react';
+import { ThemeProvider } from 'styled-components';
+import { useTheme } from '@/hooks/useTheme';
 
-// Add theme type support for styled-components
-declare module "styled-components" {
-  export interface DefaultTheme extends Theme {}
-}
+import { Item } from './components/SearchableList/SearchableList.types';
 
 const App: React.FC = () => {
   const { theme, isDarkMode, toggleTheme } = useTheme();
+
+  const handleSearch = (key: string) => {
+    console.log('Searching for:', key);
+  };
 
   return (
     <ThemeProvider theme={theme}>
       <div>
         <button onClick={toggleTheme}>
-          Toggle {isDarkMode ? "Light" : "Dark"} Mode
+          Toggle {isDarkMode ? 'Light' : 'Dark'} Mode
         </button>
 
-        <div style={{ width: "400px" }}>
+        <div style={{ width: '400px' }}>
           <SearchableList
-            stickyHeaders
             data={sampleData}
-            // onSearch={handleSearch}
-            listHeight={400}
-            // renderSectionHeader={renderCustomSectionHeader}
-            // renderItem={renderCustomItem}
-            containerStyles={{
-              "max-width": "100%",
+            onSearch={handleSearch}
+            renderItem={(item: Item) => {
+              console.log('item@@@', item);
+              return (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    width: '100%',
+                    gap: '10px',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                    }}
+                  >
+                    <img
+                      src={item.avatarUrl}
+                      alt=""
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                      }}
+                    />
+                  </span>
+                  <span>{item.primaryText}</span>
+                </div>
+              );
             }}
-            searchInputStyles={{
-              padding: "14px 16px 14px 44px",
+            renderSectionHeader={(section: any) => {
+              console.log('section@@@', section);
+              return <div>{section.title}</div>;
             }}
           />
         </div>

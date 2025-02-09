@@ -1,4 +1,4 @@
-export const DefaultAvatar = () => (
+const DefaultAvatar = () => (
   <svg
     width="36"
     height="36"
@@ -15,3 +15,5 @@ export const DefaultAvatar = () => (
     />
   </svg>
 );
+
+export default DefaultAvatar;

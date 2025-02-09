@@ -1,334 +1,137 @@
-import React, { useState, useCallback, useMemo } from "react";
-import { VariableSizeList as List } from "react-window";
-import styled from "styled-components";
-import { rgba } from "polished";
-import { SearchIcon } from "../icons/SearchIcon";
-import { DefaultAvatar } from "./DefaultAvatar";
-import { ChevronRight } from "../icons/ChevronRight";
-import { ChevronDown } from "../icons/ChevronDown";
-import TextDisplay from "../TextDisplay";
+import React, { useCallback, useMemo, useState } from 'react';
+import { VariableSizeList as List } from 'react-window';
 
-interface StyleProps extends React.CSSProperties {
-  isCollapsed?: boolean;
-  focusBorderColor?: string;
-  focusBoxShadow?: string;
-  placeholderColor?: string;
-  hoverBackground?: string;
-}
+import DefaultAvatar from '../DefaultAvatar';
+import { ChevronDown } from '../icons/ChevronDown';
+import { ChevronRight } from '../icons/ChevronRight';
+import { SearchIcon } from '../icons/SearchIcon';
+import TextDisplay from '../TextDisplay';
+import {
+  AvatarWrapper,
+  Container,
+  ListItem,
+  SearchInput,
+  SearchWrapper,
+  SectionHeader,
+} from './SearchableList.styles';
+import { Item, ItemContent, SearchableListProps } from './SearchableList.types';
 
-interface ItemContent {
+// Constants for layout dimensions
+const HEADER_HEIGHT = 37; // Height of the header
+const ITEM_HEIGHT = 52; // Height of the list item
+const SPACING = 8; // Spacing between items
+const ZERO = 0; // Constant for zero
+const ONE = 1; // Constant for one
+
+// Component to render individual items in the list
+const DefaultItemRender = ({
+  avatarUrl,
+  primaryText,
+  secondaryText,
+  primaryTextStyle,
+  secondaryTextStyle,
+  primaryTextClassName,
+  secondaryTextClassName,
+}: {
   avatarUrl?: string;
-  name: string;
-  email?: string;
-}
-
-interface Item extends ItemContent {
-  id: string | number;
-  [key: string]: any;
-}
-
-interface Section {
-  id: string | number;
-  title: string;
-  items: Item[];
-}
-
-interface SearchableListProps {
-  data: Section[];
-  renderItem?: (
-    item: Item,
-    defaultRender: (item: ItemContent) => React.ReactNode
-  ) => React.ReactNode;
-  renderSectionHeader?: (section: {
-    title: string;
-    sectionId: string | number;
-  }) => React.ReactNode;
-  onSearch?: (value: string) => void;
-  containerStyles?: Partial<StyleProps>;
-  searchInputStyles?: Partial<StyleProps>;
-  sectionHeaderStyles?: Partial<StyleProps>;
-  listItemStyles?: Partial<StyleProps>;
-  listHeight?: number;
-  containerClassName?: string;
-  searchInputClassName?: string;
-  sectionHeaderClassName?: string;
-  listItemClassName?: string;
+  primaryText: string;
+  secondaryText?: string;
   primaryTextStyle?: React.CSSProperties;
   secondaryTextStyle?: React.CSSProperties;
   primaryTextClassName?: string;
   secondaryTextClassName?: string;
-}
+}) => {
+  const [showDefaultAvatar, setShowDefaultAvatar] = useState(false);
 
-// Add default theme values
-export const defaultTheme = {
-  colors: {
-    primary: "#007AFF",
-    background: {
-      main: "#ffffff",
-      light: rgba(0, 0, 0, 0.02),
-      hover: rgba(0, 0, 0, 0.04),
-      secondaryHover: "rgba(242, 245, 247, 1)",
-      secondaryActive: "rgba(230, 236, 239, 1)",
-      element: "rgba(255, 255, 255, 1)",
-    },
-    border: rgba(0, 0, 0, 0.1),
-    borderMedium: "rgba(228, 229, 232, 1)",
-    text: {
-      primary: "rgba(32, 55, 75, 1)",
-      secondary: rgba(0, 0, 0, 0.4),
-      light: "rgba(90, 109, 128, 1)",
-      placeholder: "rgba(142, 154, 165, 1)",
-    },
-    primary200: "rgba(244, 241, 253, 1)",
-  },
-  spacing: {
-    small: "8px",
-    medium: "16px",
-    large: "24px",
-  },
-  borderRadius: {
-    small: "6px",
-    medium: "8px",
-    large: "12px",
-  },
+  return (
+    <>
+      <AvatarWrapper>
+        {avatarUrl && !showDefaultAvatar ? (
+          <img
+            src={avatarUrl}
+            alt={primaryText}
+            onError={() => setShowDefaultAvatar(true)} // Show default avatar on error
+          />
+        ) : (
+          <DefaultAvatar />
+        )}
+      </AvatarWrapper>
+      <TextDisplay
+        primaryText={primaryText}
+        secondaryText={secondaryText}
+        primaryTextStyle={primaryTextStyle}
+        secondaryTextStyle={secondaryTextStyle}
+        primaryTextClassName={primaryTextClassName}
+        secondaryTextClassName={secondaryTextClassName}
+      />
+    </>
+  );
 };
-// padding: ${({ theme }) => theme?.spacing?.medium || defaultTheme.spacing.medium};
-const Container = styled.div<StyleProps>`
-  width: 100%;
-  max-width: 600px;
-  background: ${({ theme }) =>
-    theme?.colors?.background?.main || defaultTheme.colors.background.main};
-  border-radius: ${({ theme }) =>
-    theme?.borderRadius?.medium || defaultTheme.borderRadius.medium};
-  box-shadow: 0 2px 8px ${rgba(0, 0, 0, 0.1)};
-  font-family: "Roboto", sans-serif;
 
-  ${(props) =>
-    Object.entries(props)
-      .filter(([key]) => !["children", "as", "theme"].includes(key))
-      .map(([key, value]) => `${key}: ${value};`)}
-`;
-
-const SearchWrapper = styled.div`
-  position: relative;
-  width: 100%;
-  display: flex;
-  align-items: center;
-
-  svg {
-    position: absolute;
-    left: 16px;
-    width: 20px;
-    height: 20px;
-    color: ${({ theme }) =>
-      theme?.colors?.text?.secondary || defaultTheme.colors.text.secondary};
-    pointer-events: none;
-    transition: color 0.2s ease;
-  }
-
-  // When input is focused, change the icon color
-  input:focus + svg,
-  input:focus ~ svg {
-    color: ${({ theme }) =>
-      theme?.colors?.primary || defaultTheme.colors.primary};
-  }
-`;
-
-const SearchInput = styled.input<StyleProps>`
-  width: 100%;
-  height: 48px;
-  padding: 14px 16px 14px 48px;
-  border: 0;
-  border-radius: ${({ theme }) =>
-    theme?.borderRadius?.small || defaultTheme.borderRadius.small};
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 20px;
-  transition: all 0.2s ease;
-  background: ${({ theme }) =>
-    theme?.colors?.background?.main || defaultTheme.colors.background.main};
-
-  &:focus {
-    outline: none;
-  }
-
-  &::placeholder {
-    color: ${({ theme }) =>
-      theme?.colors?.text?.placeholder || defaultTheme.colors.text.placeholder};
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 20;
-  }
-
-  ${(props) =>
-    Object.entries(props)
-      .filter(([key]) => !["children", "as", "theme"].includes(key))
-      .map(([key, value]) => `${key}: ${value};`)}
-`;
-
-const SectionHeader = styled.button<StyleProps>`
-  padding-left: ${({ theme }) =>
-    `${theme?.spacing?.medium || defaultTheme.spacing.medium}`};
-  padding-right: ${({ theme }) =>
-    `${theme?.spacing?.small || defaultTheme.spacing.small}`};
-  padding-top: 8.5px;
-  padding-bottom: 8.5px;
-  background: ${({ theme }) =>
-    theme?.colors?.background?.light || defaultTheme.colors.background.light};
-  color: ${({ theme }) =>
-    theme?.colors?.text?.light || defaultTheme.colors.text.light};
-  font-weight: ${({ fontWeight = "500" }) => fontWeight};
-  font-size: ${({ fontSize = "14px" }) => fontSize};
-  line-height: ${({ lineHeight = "20" }) => lineHeight};
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  user-select: none;
-  border-left: 0;
-  border-right: 0;
-  border-radius: 0;
-  border-top: 1px solid
-    ${({ theme }) =>
-      theme?.colors?.borderMedium || defaultTheme.colors.borderMedium};
-  border-bottom: 1px solid
-    ${({ theme }) =>
-      theme?.colors?.borderMedium || defaultTheme.colors.borderMedium};
-
-  &:hover {
-    background: ${({ theme }) =>
-      theme?.colors?.background?.hover || defaultTheme.colors.background.hover};
-  }
-
-  svg {
-    color: ${({ theme }) =>
-      theme?.colors?.text?.secondary || defaultTheme.colors.text.secondary};
-  }
-
-  &:hover {
-    background: ${({ theme }) =>
-      theme?.colors?.background?.hover || defaultTheme.colors.background.hover};
-
-    border-color: ${({ theme }) =>
-      theme?.colors?.background?.hover || defaultTheme.colors.background.hover};
-  }
-
-  & > span {
-    line-height: normal;
-  }
-
-  &:focus {
-    background: ${({ theme }) =>
-      theme?.colors?.background?.hover || defaultTheme.colors.background.hover};
-    outline: 4px auto
-      ${({ theme }) =>
-        theme?.colors?.background?.hover ||
-        defaultTheme.colors.background.hover};
-  }
-`;
-
-const AvatarWrapper = styled.div`
-  width: 36px;
-  height: 36px;
-  margin-right: 12px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  overflow: hidden;
-
-  img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-`;
-
-// Update the ListItem component
-const ListItem = styled.div<StyleProps>`
-  padding: ${({ theme }) =>
-    `${theme?.spacing?.small || defaultTheme.spacing.small} ${
-      theme?.spacing?.small || defaultTheme.spacing.small
-    }`};
-  margin: 0 8px; // Keep the margin
-  width: calc(100% - 16px) !important;
-  left: 8px;
-  color: ${({ theme }) =>
-    theme?.colors?.text?.primary || defaultTheme.colors.text.primary};
-  font-size: ${({ fontSize = "14px" }) => fontSize};
-  font-weight: ${({ fontWeight = 500 }) => fontWeight};
-  cursor: pointer;
-  transition: background 0.2s ease;
-  text-align: left;
-  border-radius: ${({ theme }) =>
-    theme?.borderRadius?.small || defaultTheme.borderRadius.small};
-  display: flex;
-  align-items: center;
-  position: absolute;
-
-  &:hover {
-    background: ${({ theme }) =>
-      theme?.colors?.background?.secondaryHover ||
-      defaultTheme.colors.background.secondaryHover};
-  }
-`;
-
+// Main SearchableList component
 const SearchableList: React.FC<SearchableListProps> = React.memo(
   ({
     data,
     renderItem,
     renderSectionHeader,
     onSearch,
-    containerStyles = {},
-    searchInputStyles = {},
-    sectionHeaderStyles = {},
-    listItemStyles = {},
+    styles: {
+      containerStyles = {},
+      searchInputStyles = {},
+      sectionHeaderStyles = {},
+      listItemStyles = {},
+      primaryTextStyle = {},
+      secondaryTextStyle = {},
+    } = {},
+    classNames: {
+      listItemClassName = '',
+      containerClassName = '',
+      primaryTextClassName = '',
+      searchInputClassName = '',
+      sectionHeaderClassName = '',
+      secondaryTextClassName = '',
+    } = {},
     listHeight = 400,
-    containerClassName,
-    searchInputClassName,
-    sectionHeaderClassName,
-    listItemClassName,
-    primaryTextStyle,
-    secondaryTextStyle,
-    primaryTextClassName,
-    secondaryTextClassName,
   }) => {
-    const [searchValue, setSearchValue] = useState("");
+    const [searchValue, setSearchValue] = useState(''); // State for search input
     const [collapsedSections, setCollapsedSections] = useState<
       Record<string | number, boolean>
-    >({});
+    >({}); // State to track collapsed sections
 
+    // Handle search input changes
     const handleSearch = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setSearchValue(value);
-        if (onSearch) onSearch(value);
+        if (onSearch) onSearch(value); // Call the onSearch callback if provided
       },
-      [onSearch]
+      [onSearch],
     );
 
+    // Flatten the data for rendering
     const flattenedData = useMemo(() => {
       return data.reduce<
         Array<
           {
-            type: "header" | "item";
+            type: 'header' | 'item';
             sectionId?: string | number;
             title?: string;
           } & Partial<Item>
         >
       >((acc, section) => {
         const filteredItems = section.items.filter((item) =>
-          item.primaryText.toLowerCase().includes(searchValue.toLowerCase())
+          item.primaryText.toLowerCase().includes(searchValue.toLowerCase()),
         );
 
         if (filteredItems.length) {
           acc.push({
-            type: "header",
+            type: 'header',
             sectionId: section.id,
             title: section.title,
           });
           if (!collapsedSections[section.id]) {
             filteredItems.forEach((item) =>
-              acc.push({ type: "item", ...item })
+              acc.push({ type: 'item', ...item }),
             );
           }
         }
@@ -336,114 +139,73 @@ const SearchableList: React.FC<SearchableListProps> = React.memo(
       }, []);
     }, [data, searchValue, collapsedSections]);
 
-    const getItemPosition = (index: number, data: any[]) => {
+    // Calculate the position of each item in the list
+    const getItemPosition = (index: number, data: Item[]) => {
       let position = 0;
       for (let i = 0; i < index; i++) {
         const item = data[i];
-        if (item.type === "header") {
-          position += 37;
+        if (item.type === 'header') {
+          position += HEADER_HEIGHT; // Add header height
         } else {
-          position += 52;
+          position += ITEM_HEIGHT; // Add item height
           // Add spacing after header
-          if (i > 0 && data[i - 1].type === "header") {
-            position += 8;
+          if (i > ZERO && data[i - ONE].type === 'header') {
+            position += SPACING; // Add spacing if previous item is a header
           }
           // Add spacing before header
-          if (i < data.length - 1 && data[i + 1].type === "header") {
-            position += 8;
+          if (i < data.length - ONE && data[i + ONE].type === 'header') {
+            position += SPACING; // Add spacing if next item is a header
           }
         }
       }
 
       // Add spacing for current item if after header
       if (
-        index > 0 &&
-        data[index - 1].type === "header" &&
-        data[index].type !== "header"
+        index > ZERO &&
+        data[index - ONE].type === 'header' &&
+        data[index].type !== 'header'
       ) {
-        position += 8;
+        position += SPACING; // Add spacing if current item follows a header
       }
 
-      return position;
+      return position; // Return the calculated position
     };
 
+    // Get the size of each item based on its type
     const getItemSize = (index: number): number => {
       const item = flattenedData[index];
-      // Always return 37 for headers
-      if (item.type === "header") {
-        return 37;
+      if (item.type === 'header') {
+        return HEADER_HEIGHT; // Return header height
       }
 
-      // For non-header items
-      const baseHeight = 52;
       const topPadding =
-        index > 0 && flattenedData[index - 1].type === "header" ? 8 : 0;
+        index > ZERO && flattenedData[index - ONE].type === 'header'
+          ? SPACING
+          : ZERO; // Add top padding if previous item is a header
       const bottomPadding =
-        index < flattenedData.length - 1 &&
-        flattenedData[index + 1].type === "header"
-          ? 8
-          : 0;
+        index < flattenedData.length - ONE &&
+        flattenedData[index + ONE].type === 'header'
+          ? SPACING
+          : ZERO; // Add bottom padding if next item is a header
 
-      return baseHeight + topPadding + bottomPadding;
+      return ITEM_HEIGHT + topPadding + bottomPadding; // Return total item size
     };
 
+    // Toggle the collapsed state of a section
     const toggleSection = (sectionId: string | number): void => {
       setCollapsedSections((prev) => ({
         ...prev,
-        [sectionId]: !prev[sectionId],
+        [sectionId]: !prev[sectionId], // Toggle the collapsed state
       }));
     };
 
-    // Add a default render function
-    const DefaultItemRender = ({
-      avatarUrl,
-      primaryText,
-      secondaryText,
-      primaryTextStyle,
-      secondaryTextStyle,
-      primaryTextClassName,
-      secondaryTextClassName,
-    }: {
-      avatarUrl?: string;
-      primaryText: string;
-      secondaryText?: string;
-      primaryTextStyle?: React.CSSProperties;
-      secondaryTextStyle?: React.CSSProperties;
-      primaryTextClassName?: string;
-      secondaryTextClassName?: string;
-    }) => (
-      <>
-        <AvatarWrapper>
-          {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt={primaryText}
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-                e.currentTarget.parentElement?.appendChild(DefaultAvatar());
-              }}
-            />
-          ) : (
-            <DefaultAvatar />
-          )}
-        </AvatarWrapper>
-        <TextDisplay
-          primaryText={primaryText}
-          secondaryText={secondaryText}
-          primaryTextStyle={primaryTextStyle}
-          secondaryTextStyle={secondaryTextStyle}
-          primaryTextClassName={primaryTextClassName}
-          secondaryTextClassName={secondaryTextClassName}
-        />
-      </>
-    );
-
+    // Generate a unique key for the list based on collapsed sections and search value
     const listKey = useMemo(
       () =>
         `${Object.entries(collapsedSections)
           .map(([k, v]) => `${k}-${v}`)
-          .join("_")}_${searchValue}`,
-      [collapsedSections, searchValue]
+          .join('_')}_${searchValue}`,
+      [collapsedSections, searchValue],
     );
 
     return (
@@ -471,7 +233,7 @@ const SearchableList: React.FC<SearchableListProps> = React.memo(
           {({ index, style }) => {
             const item = flattenedData[index];
 
-            if (item.type === "header") {
+            if (item.type === 'header') {
               return (
                 <SectionHeader
                   {...sectionHeaderStyles}
@@ -498,8 +260,8 @@ const SearchableList: React.FC<SearchableListProps> = React.memo(
               <ListItem
                 style={{
                   ...style,
-                  height: 52,
-                  top: getItemPosition(index, flattenedData),
+                  height: ITEM_HEIGHT,
+                  top: getItemPosition(index, flattenedData as Item[]),
                 }}
                 {...listItemStyles}
                 className={listItemClassName}
@@ -529,7 +291,9 @@ const SearchableList: React.FC<SearchableListProps> = React.memo(
         </List>
       </Container>
     );
-  }
+  },
 );
+
+SearchableList.displayName = 'SearchableList';
 
 export default SearchableList;
