@@ -35,8 +35,16 @@ export const WithProps: Story = {
     onSearch: {
       description: 'Search callback',
     },
+    listHeight: {
+      description: 'Height of the list item container',
+    },
+    classNames: {
+      description:
+        'Give class name to parts of the component for more customized styling',
+    },
   },
   args: {
+    listHeight: 400,
     data: sampleData,
     onSearch: (search: string) => {
       console.log(search);
@@ -59,6 +67,14 @@ export const WithProps: Story = {
         padding: '12px', // Custom padding for list items
         margin: '4px 0', // Custom margin for list items
       },
+    },
+    classNames: {
+      listItemClassName: '',
+      containerClassName: '',
+      primaryTextClassName: '',
+      searchInputClassName: '',
+      sectionHeaderClassName: '',
+      secondaryTextClassName: '',
     },
   },
 };
