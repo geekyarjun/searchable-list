@@ -103,6 +103,12 @@ npm run storybook
 
 This will start the Storybook server, and you can view your `SearchableList` component along with the various stories you created.
 
+## To-Do List - Due to time restrictions I was not able to work on all the aspects of this component
+- [ ] Allow to pass getItemSize() as prop
+- [ ] Introduce isExpanded key in the data prop so we can programatically control expand and collapse of section
+- [ ] Allows async loading of data
+- [ ] Introduce searchValue prop to programatically control the search input box
+
 ## Conclusion
 
 The `SearchableList` component is a powerful tool for displaying and searching through lists of items in a user-friendly manner. With its customizable styles and interactive features, it can be easily integrated into any React application. The use of `react-window` for virtualization ensures that the component remains performant and scalable, even with large datasets.
